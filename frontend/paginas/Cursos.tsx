@@ -36,7 +36,7 @@ const Cursos: React.FC = () => {
       <CssBaseline />
       <GlobalStyles styles={{ body: { backgroundColor: "#121212" } }} />
       <Cabecalho />
-      <Container component="main" sx={{ mt: 4, mb: 8 }}>
+      <Container component="main" sx={{ mt: 10, mb: 8 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Typography component="h1" variant="h4">
             Nossos Cursos

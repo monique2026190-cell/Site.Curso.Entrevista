@@ -26,7 +26,7 @@ const MeuPerfil: React.FC = () => {
       <GlobalStyles styles={{ body: { backgroundColor: "#121212" } }} />
       <Cabecalho />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Container sx={{ mt: 4, mb: 8, flexGrow: 1 }}>
+        <Container sx={{ mt: 10, mb: 8, flexGrow: 1 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
             <Typography variant="h4" gutterBottom>Meu Perfil</Typography>
             <IconButton color="primary" onClick={() => navigate('/configuracoes-app')}>

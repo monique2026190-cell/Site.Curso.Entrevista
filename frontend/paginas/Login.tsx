@@ -8,10 +8,12 @@ import {
   Typography, 
   Avatar,
   Link as MuiLink,
-  CssBaseline
+  CssBaseline,
+  Divider
 } from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import GoogleIcon from '@mui/icons-material/Google';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Logo from '../componentes/logo';
 
 const darkTheme = createTheme({
   palette: {
@@ -70,6 +72,12 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleGoogleLogin = () => {
+    // Lógica de login com Google (a ser implementada)
+    console.log("Login com Google clicado");
+    // Exemplo: navigate('/completar-perfil');
+  };
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
@@ -95,8 +103,8 @@ const Login: React.FC = () => {
               boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.5)'
             }}
           >
-            <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-              <LockOutlinedIcon />
+            <Avatar sx={{ m: 1, bgcolor: 'primary.main', width: 48, height: 48 }}>
+              <Logo />
             </Avatar>
             <Typography component="h1" variant="h5" sx={{ mb: 3, color: 'text.primary' }}>
               Bem-vindo de volta!
@@ -136,11 +144,21 @@ const Login: React.FC = () => {
               >
                 Entrar
               </Button>
-              <Box sx={{ textAlign: 'center', mt: 2 }}>
+              <Box sx={{ textAlign: 'center', mt: 2, mb: 2 }}>
                 <MuiLink href="#" variant="body2" sx={{ color: 'primary.main' }}>
                   Esqueceu a senha?
                 </MuiLink>
               </Box>
+              <Divider sx={{ my: 2 }}>OU</Divider>
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<GoogleIcon />}
+                onClick={handleGoogleLogin}
+                sx={{ py: 1.5 }}
+              >
+                Entrar com Google
+              </Button>
             </Box>
           </Box>
         </Container>

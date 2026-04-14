@@ -20,7 +20,7 @@ const PesquisaCursos: React.FC = () => {
       <CssBaseline />
       <GlobalStyles styles={{ body: { backgroundColor: "#121212" } }} />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Container sx={{ mt: 4, mb: 8, flexGrow: 1 }}>
+        <Container sx={{ mt: 10, mb: 8, flexGrow: 1 }}>
           <Typography variant="h4" gutterBottom>
             Pesquisar Cursos
           </Typography>

@@ -16,9 +16,9 @@ const darkTheme = createTheme({
 });
 
 const notificacoes = [
-  { tipo: 'novo_curso', mensagem: 'Novo curso de React Native disponível!', data: '2 dias atrás' },
-  { tipo: 'novo_comentario', mensagem: 'João comentou na sua proposta.', data: '1 dia atrás' },
-  { tipo: 'curtida', mensagem: 'Maria curtiu sua proposta.', data: '3 horas atrás' },
+  { tipo: 'novo_curso', mensagem: 'Novo curso de React Native disponível!', data: '2 dias atrás', lida: false },
+  { tipo: 'novo_comentario', mensagem: 'João comentou na sua proposta.', data: '1 dia atrás', lida: false },
+  { tipo: 'curtida', mensagem: 'Maria curtiu sua proposta.', data: '3 horas atrás', lida: true },
 ];
 
 const Notificacoes: React.FC = () => {
@@ -28,11 +28,11 @@ const Notificacoes: React.FC = () => {
       <GlobalStyles styles={{ body: { backgroundColor: "#121212" } }} />
       <Cabecalho />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Container sx={{ mt: 4, mb: 8, flexGrow: 1 }}>
+        <Container sx={{ mt: 10, mb: 8, flexGrow: 1 }}>
           <Typography variant="h4" gutterBottom>Notificações</Typography>
           {
             notificacoes.map((notificacao, index) => (
-              <NotificacaoCard key={index} tipo={notificacao.tipo as any} mensagem={notificacao.mensagem} data={notificacao.data} />
+              <NotificacaoCard key={index} tipo={notificacao.tipo as any} mensagem={notificacao.mensagem} data={notificacao.data} lida={notificacao.lida} />
             ))
           }
         </Container>

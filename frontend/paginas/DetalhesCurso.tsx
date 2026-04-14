@@ -40,7 +40,7 @@ const DetalhesCurso: React.FC = () => {
       <CssBaseline />
       <GlobalStyles styles={{ body: { backgroundColor: "#121212" } }} />
       <Cabecalho />
-      <Container component="main" sx={{ mt: 4 }}>
+      <Container component="main" sx={{ mt: 10 }}>
         <Card sx={{ bgcolor: 'background.paper' }}>
           <CardMedia
             component="img"

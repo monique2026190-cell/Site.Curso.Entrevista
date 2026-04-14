@@ -14,7 +14,7 @@ import PesquisaCursos from './paginas/PesquisaCursos';
 import ConfiguracoesCurso from './paginas/ConfiguracoesCurso';
 import ConfiguracoesApp from './paginas/ConfiguracoesApp';
 
-const App: React.FC = () => {
+const AppRoutes: React.FC = () => {
   return (
     <Router>
       <Routes>
@@ -36,4 +36,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default AppRoutes;

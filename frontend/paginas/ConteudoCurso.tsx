@@ -1,9 +1,19 @@
 import React from 'react';
-import { Typography, Container, Accordion, AccordionSummary, AccordionDetails, Box, Button, CssBaseline, GlobalStyles } from '@mui/material';
+import {
+  Typography, 
+  Container, 
+  Accordion, 
+  AccordionSummary, 
+  AccordionDetails, 
+  Box, 
+  CssBaseline, 
+  GlobalStyles 
+} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import BotaoConfiguracoesCurso from '../componentes/BotaoConfiguracoesCurso';
+import BotaoPublicarConteudo from '../componentes/BotaoPublicarConteudo';
 import Cabecalho from '../componentes/Cabecalho';
 import Footer from '../componentes/Footer';
 
@@ -19,7 +29,6 @@ const darkTheme = createTheme({
 
 const ConteudoCurso: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   const modulos = [
     { id: 1, titulo: 'Módulo 1: Introdução', aulas: ['Aula 1.1', 'Aula 1.2'] },
@@ -31,7 +40,7 @@ const ConteudoCurso: React.FC = () => {
       <CssBaseline />
       <GlobalStyles styles={{ body: { backgroundColor: "#121212" } }} />
       <Cabecalho />
-      <Container component="main" sx={{ mt: 4, flexGrow: 1 }}>
+      <Container component="main" sx={{ mt: 10, flexGrow: 1, pb: 12 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Typography component="h1" variant="h4">
             Conteúdo do Curso {id}
@@ -52,12 +61,10 @@ const ConteudoCurso: React.FC = () => {
           </Accordion>
         ))}
 
-        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-          <Button variant="contained" color="primary" size="large" onClick={() => navigate(`/criar-conteudo/${id}`)}>
-            Publicar Conteúdo
-          </Button>
-        </Box>
       </Container>
+
+      {id && <BotaoPublicarConteudo id={id} />}
+
       <Footer />
     </ThemeProvider>
   );
