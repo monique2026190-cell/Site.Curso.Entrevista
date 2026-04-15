@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "start": "npm run build && npx ts-node backend/server.ts",
     "build": "vite build",
+    "build:server": "tsc",
+    "start": "npm run build && npm run build:server && node backend/server.js",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -27,6 +28,6 @@
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.0.2"
+    "typescript": "^5.9.3"
   }
 }
