@@ -9,13 +9,14 @@ CREATE TABLE usuarios (
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     foto_perfil TEXT, -- URL da foto de perfil do Google
+    perfil_completo BOOLEAN DEFAULT FALSE NOT NULL, -- Novo campo
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Cria a tabela de cursos
 CREATE TABLE cursos (
     id SERIAL PRIMARY KEY,
-    titulo VARCHAR(255) NOT NULL,
+    nome VARCHAR(255) NOT NULL,
     descricao TEXT NOT NULL,
     preco NUMERIC(10, 2) NOT NULL,
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

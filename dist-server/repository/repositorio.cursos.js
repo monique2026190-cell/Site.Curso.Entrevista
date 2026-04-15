@@ -1,41 +1,17 @@
-import pool from '../db/pool.js';
-import { logger } from '../logs/logger.js';
-import { findAllCursosQuery, insertCursoQuery } from '../db/queries/curso.queries.js';
+import pool from '../db/pool';
+import { buscarCursosQuery } from '../db/queries/cursos.queries';
+import { logger } from '../logs/logger';
 /**
- * Retorna todos os cursos do banco de dados.
- * @returns Uma lista de todos os cursos.
+ * Busca todos os cursos no banco de dados.
  */
-export const getAllCursos = async () => {
+export const buscarTodosCursos = async () => {
     const client = await pool.connect();
     try {
-        const result = await client.query(findAllCursosQuery);
+        const result = await client.query(buscarCursosQuery);
         return result.rows;
     }
     catch (error) {
-        logger.error({ error }, 'Error in getAllCursos');
-        throw error;
-    }
-    finally {
-        client.release();
-    }
-};
-/**
- * Cria um novo curso no banco de dados.
- * @param cursoData Os dados do novo curso a ser criado.
- * @returns O curso recém-criado.
- */
-export const createCurso = async (cursoData) => {
-    const { titulo, descricao, preco } = cursoData;
-    const client = await pool.connect();
-    try {
-        const values = [titulo, descricao, preco];
-        const result = await client.query(insertCursoQuery, values);
-        const newCurso = result.rows[0];
-        logger.info({ cursoId: newCurso.id, titulo: newCurso.titulo }, 'New curso created successfully.');
-        return newCurso;
-    }
-    catch (error) {
-        logger.error({ error, cursoData }, 'Error in createCurso');
+        logger.error({ error }, 'Erro ao buscar todos os cursos no banco de dados');
         throw error;
     }
     finally {

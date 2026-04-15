@@ -1,6 +1,6 @@
 import { logger } from '../logs/logger.js';
 import { verifyGoogleToken, generateJwt, } from '../services/servico.autenticacao.js';
-import { findOrCreateUser } from '../repository/repositorio.usuario.js'; // 1. Importa o repositório
+import { findOrCreateUser } from '../repository/repositorio.usuario.js';
 export const googleLoginHandler = async (req, res) => {
     const { credential } = req.body;
     if (!credential) {
@@ -8,25 +8,31 @@ export const googleLoginHandler = async (req, res) => {
         return res.status(400).json({ message: 'Token de credencial não fornecido.' });
     }
     try {
-        // Etapa 1: Verificar o token do Google
         const googleUser = await verifyGoogleToken(credential);
         if (!googleUser) {
             logger.warn({ credential }, 'auth.google.invalid_token');
             return res.status(401).json({ message: 'Token do Google inválido.' });
         }
         logger.info({ email: googleUser.email }, 'auth.google.token_verified');
-        // Etapa 2: Encontrar ou criar o usuário no banco de dados
         const appUser = await findOrCreateUser({
             sub: googleUser.providerId,
             name: googleUser.name,
             email: googleUser.email,
             picture: googleUser.picture
         });
-        // Etapa 3: Gerar o token JWT para a nossa aplicação
-        // Usamos os dados do `appUser` (do nosso DB) para gerar o token.
         const token = generateJwt(appUser);
         logger.info({ email: appUser.email, userId: appUser.id }, 'auth.jwt.generated');
-        res.status(200).json({ token });
+        const userForFrontend = {
+            id: appUser.id,
+            email: appUser.email,
+            name: appUser.nome,
+            picture: appUser.foto_perfil
+        };
+        res.status(200).json({
+            token,
+            perfilCompleto: appUser.perfil_completo,
+            user: userForFrontend,
+        });
     }
     catch (error) {
         logger.error({ error: { message: error.message, stack: error.stack }, credential }, 'auth.google.login_handler_error');
