@@ -6,6 +6,7 @@ import routes from './routes/rotas.js';
 import { authMiddleware } from './middleware/middleware.autenticacao.js';
 import { httpLogger } from './middleware/logger.middleware.js'; // 1. Importa o logger HTTP
 import { logger } from './logs/logger.js'; // 2. Importa o logger base
+import initDB from './db/init.db.js'; // Importa a função de inicialização do DB
 
 const app = express();
 
@@ -39,7 +40,10 @@ app.get('*', (req, res) => {
 // --- Inicialização do Servidor ---
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 
-app.listen(PORT, () => {
-  // 4. Usa o logger estruturado para a mensagem de inicialização
-  logger.info(`Servidor rodando na porta ${PORT}`);
+// Inicializa o banco de dados e, em seguida, o servidor
+initDB().then(() => {
+  app.listen(PORT, () => {
+    // 4. Usa o logger estruturado para a mensagem de inicialização
+    logger.info(`Servidor rodando na porta ${PORT}`);
+  });
 });
