@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
-import { Container, Typography, Box, Paper, CssBaseline, GlobalStyles } from '@mui/material';
+import { Container, Typography, Box, Paper, CssBaseline, GlobalStyles, TextField, Button } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useAuth } from '../contexto/contexto.autenticacao';
-import { env } from '../config/env'; // Importa a configuração de ambiente
+import { env } from '../config/env';
 
 const darkTheme = createTheme({
   palette: {
@@ -21,19 +21,27 @@ const darkTheme = createTheme({
 
 const Login: React.FC = () => {
   const { login } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  // Verifica se a configuração do Google Client ID está presente e não é um placeholder.
   const isGoogleAuthConfigured = env.googleClientId && !env.googleClientId.includes('SEU_GOOGLE_CLIENT_ID');
 
-  const handleSuccess = (credentialResponse: any) => {
-    // O token retornado pelo Google é o credentialResponse.credential
+  const handleGoogleSuccess = (credentialResponse: any) => {
     if (credentialResponse.credential) {
       login(credentialResponse.credential);
     }
   };
 
-  const handleError = () => {
+  const handleGoogleError = () => {
     console.error('Login com Google falhou');
+  };
+
+  const handleEmailPasswordLogin = (event: React.FormEvent) => {
+    event.preventDefault();
+    // Here you would typically call a login function from your auth context
+    // For now, we'll just log the credentials
+    console.log({ email, password });
+    // Example: login(email, password);
   };
 
   return (
@@ -45,11 +53,45 @@ const Login: React.FC = () => {
           <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
             Login
           </Typography>
+          <Box component="form" onSubmit={handleEmailPasswordLogin} noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Endereço de e-mail"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Senha"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Entrar
+            </Button>
+          </Box>
           <Box>
             {isGoogleAuthConfigured ? (
               <GoogleLogin
-                onSuccess={handleSuccess}
-                onError={handleError}
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
                 theme="filled_black"
                 text="signin_with"
                 shape="rectangular"
