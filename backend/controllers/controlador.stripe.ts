@@ -1,12 +1,14 @@
 import { Request, Response } from 'express';
 import Stripe from 'stripe';
 
-let stripe: Stripe | null = null;
+type StripeInstance = InstanceType<typeof Stripe>;
+
+let stripe: StripeInstance | null = null;
 
 // Initialize Stripe only if the secret key is available
 if (process.env.STRIPE_SECRET_KEY) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2026-03-25.dahlia',
+    apiVersion: '2024-04-10',
   });
   console.log('[Stripe Controller] Stripe SDK initialized.');
 } else {
