@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { criarCurso as criarCursoApi } from '../servicos/servico.cursos';
+import { useNavigate } from 'react-router-dom';
+import { criarCurso } from '../servicos/servico.cursos';
 
 interface CursoData {
   nome: string;
@@ -9,20 +10,21 @@ interface CursoData {
 export const useCriarCurso = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const criarCurso = async (data: CursoData) => {
+  const salvarCurso = async (cursoData: CursoData) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await criarCursoApi(data);
-      return response.data;
+      await criarCurso(cursoData);
+      navigate('/cursos'); // Sucesso, navegar para a lista de cursos
     } catch (err) {
-      setError('Ocorreu um erro ao criar o curso.');
-      throw err;
+      setError('Falha ao criar o curso. Tente novamente mais tarde.');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  return { criarCurso, loading, error };
+  return { salvarCurso, loading, error };
 };
