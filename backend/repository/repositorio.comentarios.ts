@@ -1,5 +1,5 @@
-import pool from '../db/pool';
-import { queriesComentarios } from '../db/queries/comentarios.queries';
+import pool from '../db/pool.js';
+import { queriesComentarios } from '../db/queries/comentarios.queries.js';
 
 export const repositorioComentarios = {
     async buscarComentariosPorCurso(cursoId: number) {

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { controladorComentarios } from '../controllers/controlador.comentarios';
+import { controladorComentarios } from '../controllers/controlador.comentarios.js';
 
 const rotasComentarios = Router();
 
