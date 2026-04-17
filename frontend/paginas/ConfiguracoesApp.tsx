@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { ContaSection } from './ContaSection';
 import { FinanceiroSection } from './FinanceiroSection';
 import { SegurancaSection } from './SegurancaSection';
+import { useAuth } from '../contexto/contexto.autenticacao';
 
 // O mesmo tema escuro e sofisticado da página de cursos
 const darkTheme = createTheme({
@@ -42,6 +43,7 @@ const darkTheme = createTheme({
 
 export const ConfiguracoesApp: React.FC = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -80,6 +82,7 @@ export const ConfiguracoesApp: React.FC = () => {
               fullWidth
               variant="text"
               startIcon={<ExitToAppIcon />}
+              onClick={logout}
               sx={{
                 p: '12px',
                 borderRadius: 2.5,

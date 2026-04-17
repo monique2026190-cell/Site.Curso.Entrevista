@@ -38,17 +38,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const restaurarSessao = async () => {
+      console.log("Restaurando sessão...");
       const storedToken = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
+      console.log("Token do localStorage:", storedToken);
+      console.log("Usuário do localStorage:", storedUser);
+
       if (storedToken && storedUser) {
         logger.info('auth.session.restore.attempt', { hasToken: true, hasUser: true });
         api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
+        console.log("Sessão restaurada:", { token: storedToken, user: JSON.parse(storedUser) });
       } else {
-          logger.info('auth.session.restore.no_data', { hasToken: !!storedToken, hasUser: !!storedUser });
+        logger.info('auth.session.restore.no_data', { hasToken: !!storedToken, hasUser: !!storedUser });
+        console.log("Nenhum dado de sessão encontrado.");
       }
       setLoading(false);
+      console.log("Restauração da sessão concluída. Loading:", false);
     };
 
     restaurarSessao();
