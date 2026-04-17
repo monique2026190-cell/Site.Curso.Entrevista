@@ -8,7 +8,9 @@ import cors from 'cors';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 
-// Use require for pino-http to avoid import issues
+// Use createRequire to import CommonJS module in ES module
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 const pinoHttp = require('pino-http');
 
 import logger from './logger.js';
