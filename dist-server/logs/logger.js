@@ -1,8 +1,6 @@
 import pino from 'pino';
-// A configuração do logger é definida com base no ambiente
 let pinoOptions;
 if (process.env.NODE_ENV !== 'production') {
-    // --- CONFIGURAÇÃO DE DESENVOLVIMENTO (VERSÃO IDEAL 9.5/10) ---
     pinoOptions = {
         level: 'debug',
         transport: {
@@ -10,48 +8,42 @@ if (process.env.NODE_ENV !== 'production') {
             options: {
                 colorize: true,
                 translateTime: 'SYS:yyyy-mm-dd HH:MM:ss',
-                // Ignora campos que serão formatados manualmente para evitar duplicatas
-                ignore: 'pid,hostname,reqId,req,res,responseTime,userId,email,nome,context,category,levelLabel,ip,status,method,url',
+                ignore: 'pid,hostname,reqId,req,res,responseTime,time,level,context,category,message, ...Object.keys(log)',
                 messageFormat: (log, messageKey) => {
-                    const { levelLabel = 'info', context, category, responseTime, userId, email, ip, status, method, url } = log;
-                    // --- 1. Mapeamento de Eventos e Emojis ---
+                    const { levelLabel = 'info', context, category, responseTime, userId, email, nome, ip, status, method, url, err } = log;
                     const eventMap = {
                         'auth.login.attempt': 'Tentativa de login',
                         'auth.login.success': 'Login realizado',
                         'auth.login.error': 'Erro no login',
                         'auth.session.restore': 'Restaurando sessão',
+                        'db.init.success': 'Inicialização concluída',
+                        'db.connect.success': 'Conexão estabelecida',
+                        'server.start': 'Servidor iniciado',
+                        'frontend.available': 'Disponível em',
                     };
-                    let emoji = '➡️'; // Emoji padrão
-                    let translatedMessage = log[messageKey] || '';
-                    // --- 2. Determina o Emoji e a Mensagem ---
-                    if (method && url) { // É uma requisição HTTP
-                        if (url && (/\.(ico|png|jpg|svg|css|woff2)$/).test(url)) {
-                            emoji = '🖼️'; // Asset estático
-                        }
-                        else {
-                            emoji = '🌐'; // Chamada de API
-                        }
+                    let emoji = '➡️';
+                    let translatedMessage = eventMap[log[messageKey]] || log[messageKey] || '';
+                    const categoryEmojis = {
+                        'Banco': '🗄️',
+                        'Servidor': '🚀',
+                        'Frontend': '🔗',
+                        'API': '🌐'
+                    };
+                    if (method && url) {
+                        emoji = /\.(ico|png|jpg|svg|css|woff2)$/.test(url) ? '🖼️' : '🌐';
                     }
-                    else { // É um log de aplicação
-                        translatedMessage = eventMap[log[messageKey]] || translatedMessage;
-                        if (log[messageKey]?.includes('success'))
-                            emoji = '✅';
-                        else if (log[messageKey]?.includes('error'))
-                            emoji = '❌';
-                        else if (log[messageKey]?.includes('attempt'))
-                            emoji = '🔐';
-                        else if (levelLabel === 'warn')
-                            emoji = '⚠️';
-                        else if (levelLabel === 'debug')
-                            emoji = '🐛';
-                        else
-                            emoji = 'ℹ️';
+                    else if (category && categoryEmojis[category]) {
+                        emoji = categoryEmojis[category];
                     }
-                    // --- 3. Monta a Hierarquia ---
+                    else {
+                        const levelEmojis = {
+                            info: 'ℹ️', warn: '⚠️', error: '❌', fatal: '💀', debug: '🐛',
+                        };
+                        emoji = levelEmojis[levelLabel] || '➡️';
+                    }
                     const hierarchy = [context, category].filter(Boolean).join(' > ');
-                    // --- 4. Monta o Conteúdo Principal ---
                     let mainContent = '';
-                    if (method && url) { // Requisição HTTP
+                    if (method && url) {
                         const statusCode = status || log.res?.statusCode;
                         mainContent += `${method} ${url}`;
                         if (statusCode)
@@ -59,31 +51,22 @@ if (process.env.NODE_ENV !== 'production') {
                         if (responseTime)
                             mainContent += ` | ⏱️ ${responseTime}ms`;
                     }
-                    else { // Log da aplicação
+                    else {
                         mainContent = translatedMessage;
                     }
-                    // --- 5. Monta a Mensagem Final ---
                     let finalMsg = `${emoji} ${hierarchy ? `${hierarchy} > ` : ''}${mainContent}`;
-                    // --- 6. Adiciona Detalhes Extras ---
-                    const details = [];
-                    if (userId)
-                        details.push(`👤 ID: ${userId}`);
-                    if (email)
-                        details.push(`📧 ${email}`);
-                    if (ip)
-                        details.push(`📍 ${ip}`);
+                    const ignoredDetails = new Set(['level', 'time', 'pid', 'hostname', 'levelLabel', 'context', 'category', 'message', messageKey, 'err', 'stack']);
+                    const details = Object.keys(log)
+                        .filter(key => !ignoredDetails.has(key))
+                        .map(key => `${key}: ${log[key]}`);
                     if (details.length > 0) {
                         finalMsg += ` | ${details.join(' | ')}`;
                     }
-                    // Adiciona a mensagem de erro original, se houver
-                    if (levelLabel === 'error' && log.err) {
-                        finalMsg += ` | ${log.err}`;
+                    if (err) {
+                        finalMsg += ` | ${err.stack || err.message}`;
                     }
                     return finalMsg;
                 },
-                customLevels: { http: 10, debug: 20, info: 30, warn: 40, error: 50, fatal: 60 },
-                useOnlyCustomLevels: false,
-                levelFirst: true,
             },
         },
         formatters: {
@@ -94,7 +77,6 @@ if (process.env.NODE_ENV !== 'production') {
     };
 }
 else {
-    // --- CONFIGURAÇÃO DE PRODUÇÃO (JSON) ---
     pinoOptions = {
         level: 'info',
         formatters: {
@@ -104,6 +86,5 @@ else {
         },
     };
 }
-// Cria a instância final do logger
 const logger = pino(pinoOptions);
 export { logger };
