@@ -1,5 +1,8 @@
 
-import pinoHttp from 'pino-http';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pinoHttp = require('pino-http');
+
 import { logger } from '../logs/logger.js';
 
 // Cria um middleware de log HTTP usando pino-http e o logger base
