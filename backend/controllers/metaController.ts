@@ -1,29 +1,51 @@
 import { Request, Response } from 'express';
-import { sendEvent } from '../services/metaAdsService';
+import { sendServerEvent } from '../services/metaAdsService';
 
-export const handlePageView = (req: Request, res: Response) => {
-  sendEvent('PageView');
-  res.status(200).send({ message: 'Evento PageView recebido' });
-};
+// Interface para o payload que vem do frontend
+interface FrontendEventPayload {
+    eventName: string;
+    userData?: any; // Os tipos exatos são definidos no frontend
+    customData?: any;
+    eventSourceUrl: string;
+    eventId?: string;
+    fbp?: string;
+    fbc?: string;
+}
 
-export const handleLead = (req: Request, res: Response) => {
-  const { userData } = req.body;
-  sendEvent('Lead', userData);
-  res.status(200).send({ message: 'Evento Lead recebido' });
-};
+export const handleEvent = async (req: Request, res: Response) => {
+    const payload: FrontendEventPayload = req.body;
 
-export const handleInitiateCheckout = (req: Request, res: Response) => {
-  const { eventData } = req.body;
-  sendEvent('InitiateCheckout', null, eventData);
-  res.status(200).send({ message: 'Evento InitiateCheckout recebido' });
-};
+    if (!payload.eventName || !payload.eventSourceUrl) {
+        return res.status(400).json({ message: 'eventName e eventSourceUrl são obrigatórios.' });
+    }
 
-export const handleViewContent30s = (req: Request, res: Response) => {
-  sendEvent('ViewContent', null, { content_name: 'Visualizou por 30 segundos' });
-  res.status(200).send({ message: 'Evento ViewContent30s recebido' });
-};
+    const serverEvent = {
+        event_name: payload.eventName,
+        event_time: Math.floor(Date.now() / 1000),
+        event_source_url: payload.eventSourceUrl,
+        action_source: 'website' as const, // Correção para o tipo literal
+        event_id: payload.eventId,
+        user_data: {
+            ...payload.userData,
+            client_ip_address: req.ip,
+            client_user_agent: req.headers['user-agent'],
+            fbp: payload.fbp,
+            fbc: payload.fbc,
+        },
+        custom_data: payload.customData,
+    };
 
-export const handleViewContent60s = (req: Request, res: Response) => {
-  sendEvent('ViewContent', null, { content_name: 'Visualizou por 60 segundos' });
-  res.status(200).send({ message: 'Evento ViewContent60s recebido' });
+    Object.keys(serverEvent.user_data).forEach(key => {
+        if (serverEvent.user_data[key as keyof typeof serverEvent.user_data] === undefined || serverEvent.user_data[key as keyof typeof serverEvent.user_data] === null) {
+            delete serverEvent.user_data[key as keyof typeof serverEvent.user_data];
+        }
+    });
+
+    try {
+        await sendServerEvent(serverEvent);
+        res.status(200).json({ message: `Evento '${payload.eventName}' processado com sucesso.` });
+    } catch (error) {
+        console.error(`Falha ao processar o evento '${payload.eventName}':`, error);
+        res.status(500).json({ message: 'Erro interno no servidor.' });
+    }
 };

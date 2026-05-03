@@ -1,25 +1,21 @@
 import { useEffect } from 'react';
-import { dispararPageView, dispararViewContent30s, dispararViewContent60s } from '../servicos/servico.meta.ads';
+import { dispararPageView, dispararViewContent30s } from '../servicos/servico.meta.ads';
 
 export const usePagina1 = () => {
-  useEffect(() => {
-    // Dispara o PageView quando o componente que usa o hook é montado
-    dispararPageView();
+    useEffect(() => {
+        // Dispara o PageView quando o componente que usa o hook é montado
+        dispararPageView();
 
-    // Dispara o evento de 30s
-    const timer30s = setTimeout(() => {
-      dispararViewContent30s();
-    }, 30000);
+        // Define um timer para disparar o ViewContent após 30 segundos
+        const timer30s = setTimeout(() => {
+            dispararViewContent30s();
+        }, 30000); // 30 segundos
 
-    // Dispara o evento de 60s
-    const timer60s = setTimeout(() => {
-      dispararViewContent60s();
-    }, 60000);
+        // Função de limpeza do useEffect: cancela os timers se o componente for desmontado
+        return () => {
+            clearTimeout(timer30s);
+        };
+    }, []); // O array vazio garante que o useEffect rode apenas uma vez (na montagem)
 
-    // Limpa os timers quando o componente é desmontado
-    return () => {
-      clearTimeout(timer30s);
-      clearTimeout(timer60s);
-    };
-  }, []); // O array de dependências vazio garante que isso rode apenas uma vez
+    // Este hook não precisa retornar nada, pois seu propósito é apenas disparar eventos.
 };

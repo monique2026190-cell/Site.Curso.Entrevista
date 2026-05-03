@@ -12,34 +12,43 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendEvent = void 0;
+exports.sendServerEvent = void 0;
 const axios_1 = __importDefault(require("axios"));
 const config_1 = require("../config");
-const PIXEL_ID = config_1.config.META_PIXEL_ID;
-const ACCESS_TOKEN = config_1.config.META_PIXEL_TOKEN;
-const sendEvent = (eventName, userData, customData) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!PIXEL_ID || !ACCESS_TOKEN) {
-        console.error('As variáveis de ambiente META_PIXEL_ID e META_ACCESS_TOKEN não estão definidas.');
-        return;
+const API_VERSION = 'v19.0'; // Use a versão mais recente ou a que preferir
+const META_API_URL = `https://graph.facebook.com/${API_VERSION}`;
+/**
+ * Envia um único evento de servidor para a API de Conversões do Meta.
+ *
+ * @param serverEvent - O objeto de evento preparado, pronto para ser enviado.
+ */
+const sendServerEvent = (serverEvent) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { META_PIXEL_ID, META_PIXEL_TOKEN } = config_1.config;
+    if (!META_PIXEL_ID || !META_PIXEL_TOKEN) {
+        // A verificação já acontece no server.ts, mas é uma boa prática ter aqui também
+        console.error('Pixel ID ou Token de Acesso do Meta não estão configurados.');
+        throw new Error('Credenciais do Meta não encontradas.');
     }
-    const url = `https://graph.facebook.com/v13.0/${PIXEL_ID}/events`;
+    const url = `${META_API_URL}/${META_PIXEL_ID}/events`;
+    // A API espera um payload com um array de eventos chamado 'data'
     const payload = {
-        data: [
-            {
-                event_name: eventName,
-                event_time: Math.floor(Date.now() / 1000),
-                user_data: userData,
-                custom_data: customData,
-            },
-        ],
-        access_token: ACCESS_TOKEN,
+        data: [serverEvent],
+        // O token de acesso é enviado como um parâmetro na URL
     };
     try {
-        yield axios_1.default.post(url, payload);
-        console.log(`Evento ${eventName} enviado com sucesso para a API de Conversões do Meta.`);
+        console.log('Enviando evento para a API do Meta:', JSON.stringify(payload, null, 2));
+        yield axios_1.default.post(url, payload, {
+            params: {
+                access_token: META_PIXEL_TOKEN,
+            }
+        });
+        console.log(`Evento '${serverEvent.event_name}' enviado com sucesso para a API do Meta.`);
     }
     catch (error) {
-        console.error(`Erro ao enviar o evento ${eventName} para a API de Conversões do Meta:`, error.response.data);
+        console.error(`Erro ao enviar evento '${serverEvent.event_name}' para a API do Meta:`, ((_a = error.response) === null || _a === void 0 ? void 0 : _a.data) || error.message);
+        // É importante logar a resposta do erro da API do Meta para depuração
+        throw new Error('Falha na comunicação com a API de Conversões do Meta.');
     }
 });
-exports.sendEvent = sendEvent;
+exports.sendServerEvent = sendServerEvent;
