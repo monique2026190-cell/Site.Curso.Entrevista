@@ -13,7 +13,7 @@ export const usePaginaVendas = () => {
     // Os dados do usuário serão injetados automaticamente pelo hook.
     rastrearInicioCheckout({
         // Adicione aqui os dados customizados do evento, como valor e moeda
-        value: 197.00,
+        value: 79.00,
         currency: 'BRL',
     });
 
