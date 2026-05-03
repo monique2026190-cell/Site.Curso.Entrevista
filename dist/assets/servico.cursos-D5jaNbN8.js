@@ -1,1 +1,0 @@
-import{b as s}from"./index-CjWreLF7.js";const a=()=>s.get("/api/cursos"),u=r=>s.get(`/api/cursos/${r}`),c=r=>s.post("/api/cursos",r),t=r=>s.post(`/api/cursos/${r}/publicar`);export{u as a,a as b,c,t as p};
