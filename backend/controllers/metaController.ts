@@ -1,5 +1,13 @@
 import { Request, Response } from 'express';
 import { sendServerEvent } from '../services/metaAdsService';
+import crypto from 'crypto';
+
+function hashData(data: string) {
+  return crypto
+    .createHash('sha256')
+    .update(data.trim().toLowerCase())
+    .digest('hex');
+}
 
 // Interface para o payload que vem do frontend
 interface FrontendEventPayload {
@@ -19,19 +27,28 @@ export const handleEvent = async (req: Request, res: Response) => {
         return res.status(400).json({ message: 'eventName e eventSourceUrl são obrigatórios.' });
     }
 
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+    const userData: { [key: string]: any } = {
+        ...payload.userData,
+        client_ip_address: ip,
+        client_user_agent: req.headers['user-agent'],
+        fbp: payload.fbp,
+        fbc: payload.fbc,
+    };
+
+    if (userData.email) {
+        userData.em = hashData(userData.email);
+        delete userData.email;
+    }
+
     const serverEvent = {
         event_name: payload.eventName,
         event_time: Math.floor(Date.now() / 1000),
         event_source_url: payload.eventSourceUrl,
         action_source: 'website' as const, // Correção para o tipo literal
         event_id: payload.eventId,
-        user_data: {
-            ...payload.userData,
-            client_ip_address: req.ip,
-            client_user_agent: req.headers['user-agent'],
-            fbp: payload.fbp,
-            fbc: payload.fbc,
-        },
+        user_data: userData,
         custom_data: payload.customData,
     };
 
