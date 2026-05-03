@@ -1,31 +1,23 @@
 import axios from 'axios';
 
-const API_URL = '/api/meta'; // Rota base para o backend
+// Rota base para o nosso backend que se comunica com a API do Meta
+const API_URL = '/api/meta';
 
-// -- Funções de Utilidade para Rastreamento --
+// --- Funções de Utilidade para Rastreamento ---
 
-/**
- * Extrai o cookie _fbp (Facebook Browser ID).
- * @returns O valor do cookie _fbp ou undefined se não for encontrado.
- */
-const getFbp = (): string | undefined => {
+const obterFbp = (): string | undefined => {
   if (typeof document === 'undefined') return undefined;
   const match = document.cookie.match(/_fbp=([^;]+)/);
   return match ? match[1] : undefined;
 };
 
-/**
- * Extrai o cookie _fbc (Facebook Click ID).
- * @returns O valor do cookie _fbc ou undefined se não for encontrado.
- */
-const getFbc = (): string | undefined => {
+const obterFbc = (): string | undefined => {
   if (typeof document === 'undefined') return undefined;
   const match = document.cookie.match(/_fbc=([^;]+)/);
   return match ? match[1] : undefined;
 };
 
-
-// -- Definições de Tipos de Dados (Interfaces) --
+// --- Definições de Tipos de Dados (Interfaces) ---
 
 /**
  * Dados do usuário para Advanced Matching.
@@ -43,6 +35,7 @@ export interface UserData {
   ge?: string;      // Gênero ('f' ou 'm')
   db?: string;      // Data de nascimento (formato YYYYMMDD)
   external_id?: string; // ID Externo do usuário no seu sistema
+  subscription_id?: string; // ID de Assinatura (para Facebook Login ID)
 }
 
 /**
@@ -62,106 +55,94 @@ export interface CustomData {
 /**
  * Estrutura do payload de evento enviado para o backend.
  */
-interface EventRequest {
+interface RequisicaoEvento {
   eventName: string;
   userData?: UserData;
   customData?: CustomData;
   eventSourceUrl: string;
-  eventId?: string;      // Um ID único para o evento (ajuda na desduplicação)
+  eventId?: string;
 }
 
-// -- Função Principal de Envio de Evento --
+// --- Função Principal de Envio de Evento ---
 
 /**
  * Função genérica para enviar um evento para o backend.
- * Ela constrói o payload completo, incluindo dados de rastreamento.
- * 
- * @param payload - O payload do evento a ser enviado.
  */
-const sendEventToServer = async (payload: EventRequest) => {
-  const fullPayload = {
+const enviarEventoParaServidor = async (payload: RequisicaoEvento) => {
+  const payloadCompleto = {
     ...payload,
-    // Dados de identificação técnica que o frontend pode coletar
-    fbp: getFbp(),
-    fbc: getFbc(),
-    // O backend deve adicionar: event_time, user_agent, client_ip_address e action_source ('website')
+    fbp: obterFbp(),
+    fbc: obterFbc(),
   };
 
   try {
-    // A rota '/event' no backend será responsável por receber todos os eventos
-    await axios.post(`${API_URL}/event`, fullPayload);
+    await axios.post(`${API_URL}/event`, payloadCompleto);
     console.log(`Evento '${payload.eventName}' disparado com sucesso para o backend.`);
   } catch (error) {
     console.error(`Erro ao disparar o evento '${payload.eventName}':`, error);
   }
 };
 
-
-// -- Funções Exportadas para Disparar Eventos Específicos --
+// --- Funções Exportadas para Disparar Eventos Específicos ---
 
 /**
- * Dispara o evento PageView. Essencial para rastrear visitas em todas as páginas.
+ * Dispara o evento PageView (Visualização de Página).
  */
-export const dispararPageView = () => {
-  sendEventToServer({
+export const dispararVisualizacaoPagina = (dadosUsuario?: UserData) => {
+  enviarEventoParaServidor({
     eventName: 'PageView',
     eventSourceUrl: window.location.href,
-    eventId: `pageview_${Date.now()}`, // ID de evento simples
+    eventId: `pageview_${Date.now()}`,
+    userData: dadosUsuario,
   });
 };
 
 /**
- * Dispara o evento Lead quando um usuário demonstra interesse (ex: preenche um formulário).
- * @param userData - Dados do usuário para Advanced Matching.
- * @param eventId - (Opcional) Um ID único para o evento.
+ * Dispara o evento Lead (quando um usuário demonstra interesse).
  */
-export const dispararLead = (userData: UserData, eventId?: string) => {
-  sendEventToServer({
+export const dispararLead = (dadosUsuario: UserData, eventId?: string) => {
+  enviarEventoParaServidor({
     eventName: 'Lead',
-    userData,
+    userData: dadosUsuario,
     eventSourceUrl: window.location.href,
     eventId: eventId || `lead_${Date.now()}`,
   });
 };
 
 /**
- * Dispara o evento InitiateCheckout quando um usuário inicia o processo de checkout.
- * @param userData - (Opcional) Dados do usuário.
- * @param customData - Dados sobre os produtos e valor.
- * @param eventId - (Opcional) Um ID único para o evento.
+ * Dispara o evento InitiateCheckout (Início de Checkout).
  */
-export const dispararInitiateCheckout = (customData: CustomData, userData?: UserData, eventId?: string) => {
-  sendEventToServer({
+export const dispararInicioCheckout = (dadosCustomizados: CustomData, dadosUsuario?: UserData, eventId?: string) => {
+  enviarEventoParaServidor({
     eventName: 'InitiateCheckout',
-    customData,
-    userData,
+    customData: dadosCustomizados,
+    userData: dadosUsuario,
     eventSourceUrl: window.location.href,
     eventId: eventId || `initiate_checkout_${Date.now()}`,
   });
 };
 
 /**
- * Dispara o evento ViewContent quando um usuário visualiza um conteúdo específico (ex: página de produto).
- * @param customData - Dados sobre o conteúdo visualizado.
- * @param eventId - (Opcional) Um ID único para o evento.
+ * Dispara o evento ViewContent (Visualização de Conteúdo).
  */
-export const dispararViewContent = (customData: CustomData, eventId?: string) => {
-  sendEventToServer({
-      eventName: 'ViewContent',
-      customData,
-      eventSourceUrl: window.location.href,
-      eventId: eventId || `view_content_${Date.now()}`
+export const dispararVisualizacaoConteudo = (dadosCustomizados: CustomData, dadosUsuario?: UserData, eventId?: string) => {
+  enviarEventoParaServidor({
+    eventName: 'ViewContent',
+    customData: dadosCustomizados,
+    userData: dadosUsuario,
+    eventSourceUrl: window.location.href,
+    eventId: eventId || `view_content_${Date.now()}`,
   });
 };
 
 /**
- * Dispara um evento customizado 'ViewContent30s' após o usuário passar 30s na página.
- * Este é um evento customizado e não um evento padrão do Meta.
+ * Dispara um evento customizado de visualização por 30 segundos.
  */
-export const dispararViewContent30s = () => {
-  sendEventToServer({
-      eventName: 'CustomViewContent30s', // Nomeado como customizado para clareza
-      eventSourceUrl: window.location.href,
-      eventId: `custom_view_30s_${Date.now()}`
+export const dispararVisualizacaoConteudo30s = (dadosUsuario?: UserData) => {
+  enviarEventoParaServidor({
+    eventName: 'CustomViewContent30s',
+    eventSourceUrl: window.location.href,
+    eventId: `custom_view_30s_${Date.now()}`,
+    userData: dadosUsuario,
   });
 };

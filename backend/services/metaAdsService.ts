@@ -17,7 +17,14 @@ interface ServerEvent {
     user_data: {
         client_ip_address?: string;
         client_user_agent?: string;
-        [key: string]: any; // Para outros campos como em, ph, etc.
+        em?: string; // Email
+        ph?: string; // Phone
+        fbc?: string; // Facebook click ID
+        fbp?: string; // Facebook browser ID
+        external_id?: string; // External ID
+        subscription_id?: string; // Subscription ID (Facebook Login ID)
+        st?: string; // State
+        ct?: string; // City
     };
     custom_data?: {
         [key: string]: any;

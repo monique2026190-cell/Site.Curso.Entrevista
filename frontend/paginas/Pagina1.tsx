@@ -2,9 +2,21 @@ import React, { startTransition, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePagina1 } from '../hooks/usePagina1';
 import CabecalhoEtapas from '../componentes/CabecalhoEtapas';
+import { useUsuario } from '../contexto/ContextoUsuario';
 
 const Pagina1 = () => {
+  // O hook usePagina1 é chamado. Ele usará o `useAnalise` que, por sua vez,
+  // pegará os dados do usuário que estiverem no contexto no momento do disparo do evento.
   usePagina1();
+
+  // A função `definirDadosUsuario` está disponível para ser usada quando você tiver os dados reais.
+  // Exemplo de como você a usaria em uma função de login (ISTO É APENAS UM EXEMPLO, NÃO SERÁ EXECUTADO AQUI):
+  /*
+  const handleLoginSuccess = (dadosDoUsuarioLogado) => {
+    const { definirDadosUsuario } = useUsuario();
+    definirDadosUsuario(dadosDoUsuarioLogado);
+  }
+  */
 
   const navigate = useNavigate();
   const [hoveredButton, setHoveredButton] = useState<number | null>(null);

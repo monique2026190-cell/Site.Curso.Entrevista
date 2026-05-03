@@ -1,7 +1,12 @@
 import AppRoutes from './app.routes';
+import { ProvedorUsuario } from './contexto/ContextoUsuario';
 
 function App() {
-  return <AppRoutes />;
+  return (
+    <ProvedorUsuario>
+      <AppRoutes />
+    </ProvedorUsuario>
+  );
 }
 
 export default App;

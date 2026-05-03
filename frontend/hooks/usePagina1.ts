@@ -1,21 +1,28 @@
 import { useEffect } from 'react';
-import { dispararPageView, dispararViewContent30s } from '../servicos/servico.meta.ads';
+import { useAnalise } from './useAnalise'; // Importa o novo hook centralizado
 
+/**
+ * Hook para a lógica de rastreamento específica da Página 1.
+ */
 export const usePagina1 = () => {
-    useEffect(() => {
-        // Dispara o PageView quando o componente que usa o hook é montado
-        dispararPageView();
+    // Obtém as funções de rastreamento do nosso hook de análise
+    const { rastrearVisualizacaoPagina, rastrearVisualizacaoConteudo30s } = useAnalise();
 
-        // Define um timer para disparar o ViewContent após 30 segundos
+    useEffect(() => {
+        // Dispara o evento de PageView. 
+        // Não é mais necessário passar dados do usuário aqui, o useAnalise faz isso.
+        rastrearVisualizacaoPagina();
+
+        // Define um timer para o evento de 30 segundos
         const timer30s = setTimeout(() => {
-            dispararViewContent30s();
+            rastrearVisualizacaoConteudo30s();
         }, 30000); // 30 segundos
 
-        // Função de limpeza do useEffect: cancela os timers se o componente for desmontado
+        // Função de limpeza para cancelar o timer
         return () => {
             clearTimeout(timer30s);
         };
-    }, []); // O array vazio garante que o useEffect rode apenas uma vez (na montagem)
-
-    // Este hook não precisa retornar nada, pois seu propósito é apenas disparar eventos.
+        
+    // A dependência agora é das funções de rastreamento, que são estáveis pelo useCallback no useAnalise
+    }, [rastrearVisualizacaoPagina, rastrearVisualizacaoConteudo30s]);
 };
