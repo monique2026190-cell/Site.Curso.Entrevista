@@ -27,7 +27,8 @@ export const handleEvent = async (req: Request, res: Response) => {
         return res.status(400).json({ message: 'eventName e eventSourceUrl são obrigatórios.' });
     }
 
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const ipHeader = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const ip = Array.isArray(ipHeader) ? ipHeader[0] : ipHeader?.split(',')[0].trim();
 
     const userData: { [key: string]: any } = {
         ...payload.userData,
@@ -37,8 +38,11 @@ export const handleEvent = async (req: Request, res: Response) => {
         fbc: payload.fbc,
     };
 
+    if (userData.em && typeof userData.em === 'string') {
+        userData.em = hashData(userData.em);
+    }
+    
     if (userData.email) {
-        userData.em = hashData(userData.email);
         delete userData.email;
     }
 

@@ -26,10 +26,13 @@ const handleEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     if (!payload.eventName || !payload.eventSourceUrl) {
         return res.status(400).json({ message: 'eventName e eventSourceUrl são obrigatórios.' });
     }
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const ipHeader = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const ip = Array.isArray(ipHeader) ? ipHeader[0] : ipHeader === null || ipHeader === void 0 ? void 0 : ipHeader.split(',')[0].trim();
     const userData = Object.assign(Object.assign({}, payload.userData), { client_ip_address: ip, client_user_agent: req.headers['user-agent'], fbp: payload.fbp, fbc: payload.fbc });
+    if (userData.em && typeof userData.em === 'string') {
+        userData.em = hashData(userData.em);
+    }
     if (userData.email) {
-        userData.em = hashData(userData.email);
         delete userData.email;
     }
     const serverEvent = {
