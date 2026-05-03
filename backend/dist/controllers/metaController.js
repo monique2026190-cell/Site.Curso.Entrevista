@@ -8,13 +8,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleEvent = void 0;
 const metaAdsService_1 = require("../services/metaAdsService");
+const crypto_1 = __importDefault(require("crypto"));
+function hashData(data) {
+    return crypto_1.default
+        .createHash('sha256')
+        .update(data.trim().toLowerCase())
+        .digest('hex');
+}
 const handleEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const payload = req.body;
     if (!payload.eventName || !payload.eventSourceUrl) {
         return res.status(400).json({ message: 'eventName e eventSourceUrl são obrigatórios.' });
+    }
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userData = Object.assign(Object.assign({}, payload.userData), { client_ip_address: ip, client_user_agent: req.headers['user-agent'], fbp: payload.fbp, fbc: payload.fbc });
+    if (userData.email) {
+        userData.em = hashData(userData.email);
+        delete userData.email;
     }
     const serverEvent = {
         event_name: payload.eventName,
@@ -22,7 +38,7 @@ const handleEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         event_source_url: payload.eventSourceUrl,
         action_source: 'website', // Correção para o tipo literal
         event_id: payload.eventId,
-        user_data: Object.assign(Object.assign({}, payload.userData), { client_ip_address: req.ip, client_user_agent: req.headers['user-agent'], fbp: payload.fbp, fbc: payload.fbc }),
+        user_data: userData,
         custom_data: payload.customData,
     };
     Object.keys(serverEvent.user_data).forEach(key => {

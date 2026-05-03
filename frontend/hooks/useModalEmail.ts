@@ -10,7 +10,7 @@ export const useModalEmail = (onClose: () => void) => {
   const handleSubmit = () => {
     if (email.trim()) {
       // A lógica de negócio principal está aqui.
-      dispararLead({ email });
+      dispararLead({ em: email });
     }
     // As ações que acontecem após a submissão.
     onClose();
